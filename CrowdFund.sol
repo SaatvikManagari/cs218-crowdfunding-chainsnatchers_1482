@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 // OpenZeppelin
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract CrowdFunding is Ownable, ReentrancyGuard {
 
@@ -82,9 +82,9 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
         // CHECKS
         require(msg.sender == selected.owner, "Only owner can withdraw");                 //Only owner can withdraw 
         require(block.timestamp > selected.deadlineTimestamp, "Campaign ongoing");        //withdraw only for deadline 
-        require(selected.state != status.Withdrawn , "Campaign already withdrawn")        // Double-withdraw reverts
+        require(selected.state != status.Withdrawn , "Campaign already withdrawn");       // Double-withdraw reverts
         if(selected.amountcontributed >= selected.goalWei) {
-            selected.state = status.success; 
+            selected.state = status.Success; 
         }
         require(selected.state == status.Success, "Campaign not successful");             //Make sure campaign is successful 
 
@@ -100,11 +100,13 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
         emit FundsWithdrawn(payable(msg.sender), _campaignId);
     }
 
+
+    event Refunded(address payable to, bytes32 campaign_id, uint amount);                //event
     function refund(bytes32 _campaignId) public nonReentrant {
         campaign storage selected = campaign_map[_campaignId];
         
         // CHECKS
-        require(msg.sender != selected.owner , "Owner cannot get a Refund")
+        require(msg.sender != selected.owner , "Owner cannot get a Refund");
         require(block.timestamp > selected.deadlineTimestamp, "Campaign still active");  //Refund only after Deadline
         if (selected.amountcontributed < selected.goalWei) {                             //Refund only after Deadline and goal not reached
             selected.state = status.Failed;
@@ -122,7 +124,7 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
         (bool success, ) = payable(msg.sender).call{value: contributed}("");
         require(success, "Refund failed");
 
-        emit Refunded(msg.sender, _campaignId, contributed);
+        emit Refunded(payable(msg.sender), _campaignId, contributed);
     }
 
     function getCampaign(bytes32 _campaignId) public view
