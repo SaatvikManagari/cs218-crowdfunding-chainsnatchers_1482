@@ -23,8 +23,9 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
 
     bytes32[] public campaign_id_list;
     mapping(bytes32 => campaign) public campaign_map;
+    uint256 public campaignCount;
 
-    uint campaigncount = 0; 
+    event CampaignCreated(bytes32 campaign_id, address owner, uint goalWei, uint deadlineTimestamp);
 
     //Create Campaign
     function createCampaign(uint256 _goalWei, uint256 _deadlineTimestamp)
@@ -32,10 +33,10 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
         returns (bytes32)
     {
         require(_goalWei > 0, "Funds requested invalid");
-        require(_deadlineTimestamp > block.timestamp + 120, "Deadline invalid");
+        require(_deadlineTimestamp > block.timestamp, "Deadline invalid");
 
-        uint id = campaigncount++; 
-        bytes32 campaign_id = keccak256(id); 
+        uint256 id = campaignCount++; 
+        bytes32 campaign_id = bytes32(id); 
 
         campaign_id_list.push(campaign_id);
 
@@ -47,7 +48,9 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
         newCampaign.amountcontributed = 0;
         newCampaign.state = status.Active;
 
+        emit CampaignCreated(campaign_id, msg.sender, _goalWei, _deadlineTimestamp);
         return campaign_id;
+        
     }
 
     //Contributed Event
@@ -112,10 +115,10 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
         if (selected.amountcontributed < selected.goalWei) {                             //Refund only after Deadline and goal not reached
             selected.state = status.Failed;
         }
-        require(selected.state == status.Failed, "Campaign not failed");
+        require(selected.state == status.Failed, "Campaign was Successful");                 //Refund only if campaign failed
 
         uint contributed = selected.contributions[msg.sender];
-        require(contributed > 0, "No contribution");                                     //Zero contribution refund reverts
+        require(contributed > 0, "Only contributors can get a refund");                                     //Zero contribution refund reverts
 
         // EFFECTS
         selected.contributions[msg.sender] = 0;
