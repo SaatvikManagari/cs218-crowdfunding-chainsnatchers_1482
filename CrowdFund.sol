@@ -24,6 +24,8 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
     bytes32[] public campaign_id_list;
     mapping(bytes32 => campaign) public campaign_map;
 
+    uint campaigncount = 0; 
+
     //Create Campaign
     function createCampaign(uint256 _goalWei, uint256 _deadlineTimestamp)
         public
@@ -32,9 +34,8 @@ contract CrowdFunding is Ownable, ReentrancyGuard {
         require(_goalWei > 0, "Funds requested invalid");
         require(_deadlineTimestamp > block.timestamp + 120, "Deadline invalid");
 
-        bytes32 campaign_id = keccak256(
-            abi.encodePacked(_goalWei, _deadlineTimestamp, block.number)
-        );
+        uint id = campaigncount++; 
+        bytes32 campaign_id = keccak256(id); 
 
         campaign_id_list.push(campaign_id);
 
