@@ -31,6 +31,10 @@ CrowdFunding_DApp/
 ├── test/
 │   ├── CrowdFunding.test.js        ← Test suite for original contract (13 tests)
 │   └── CrowdFundOptimized.test.js  ← Test suite for optimized contract (16 tests)
+├── reports/
+│   ├── Gas Optimization report.pdf   ← The optimization report for all the gas functions
+│   ├── Gas Report.pdf                ← Gas Report for the solidity code
+│   └── Line Coverage.pdf             ← Coverage report for Solidity Code
 ├── frontend/
 │   └── index.html                  ← HTML frontend DApp
 ├── hardhat.config.ts               ← Hardhat configuration
