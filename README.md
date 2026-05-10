@@ -15,6 +15,9 @@ A decentralized crowdfunding platform built with Solidity and Hardhat, featuring
 | Prayuktha Lucky Reddy | 240041025 |
 | Nitya Sigadapu | 240005048 |
 
+## Implementation 
+
+Link: crowdfundingdefi.netlify.app
 
 ---
 
@@ -63,7 +66,7 @@ Before setting up the project, ensure you have the following installed:
 - **WSL / Linux / macOS terminal**
 - **MetaMask** browser extension (for interacting with the frontend DApp)
 - A code editor such as **VS Code** with the Solidity extension
-
+- MetaMask wallet with sepolia testnet
 ---
 
 ## Setup Instructions
