@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Crowdfund dApp — Optimized</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<style>
+:root {
+  --bg:#0b0f1a; --surface:#111827; --surface2:#1a2235; --surface3:#1f2d42;
+  --card-bg:#131d2e; --card-border:#1e2d44;
+  --primary:#3b82f6; --primary-dim:#1d4ed8; --primary-glow:rgba(59,130,246,0.18);
+  --accent:#f59e0b; --accent2:#10b981;
+  --danger:#ef4444; --danger-dim:#7f1d1d;
+  --success:#10b981; --success-dim:#064e3b;
+  --warning:#f59e0b;
+  --text:#e2e8f0; --text-muted:#64748b; --text-dim:#94a3b8;
+  --border:#1e2d44; --sidebar-w:220px; --topbar-h:60px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text);
+  min-height:100vh; font-size:14px;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 10% 0%,rgba(59,130,246,0.07) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 40% at 90% 100%,rgba(16,185,129,0.05) 0%,transparent 70%);
+}
+/* ── TOPBAR ── */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-h);
+  background:rgba(11,15,26,0.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;z-index:100;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--primary),#6366f1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;box-shadow:0 0 18px rgba(59,130,246,0.35);
+}
+.brand-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.3px;color:#fff}
+.brand-sub{font-size:10px;color:var(--text-muted);font-weight:500;letter-spacing:.3px;text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.bal-chip{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px}
+.bal-lbl{font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.bal-val{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+.addr-chip{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 10px}
+/* ── SIDEBAR ── */
+#sidebar{
+  position:fixed;top:var(--topbar-h);left:0;bottom:0;width:var(--sidebar-w);
+  background:rgba(11,15,26,0.85);backdrop-filter:blur(10px);
+  border-right:1px solid var(--border);padding:16px 10px;overflow-y:auto;z-index:90;
+}
+.ni{
+  display:flex;align-items:center;gap:9px;width:100%;
+  padding:9px 11px;border:none;background:transparent;
+  border-radius:8px;color:var(--text-muted);font-size:13px;
+  font-weight:500;cursor:pointer;text-align:left;
+  transition:all .15s;font-family:'DM Sans',sans-serif;
+}
+.ni:hover{background:var(--surface2);color:var(--text)}
+.ni.active{background:linear-gradient(90deg,rgba(59,130,246,0.15),rgba(59,130,246,0.05));color:var(--primary);font-weight:700;border-left:2px solid var(--primary);padding-left:9px}
+.ni svg{width:15px;height:15px;flex-shrink:0}
+.nsep{height:1px;background:var(--border);margin:10px 0}
+/* ── MAIN ── */
+#main{margin-left:var(--sidebar-w);margin-top:var(--topbar-h);padding:26px 28px;min-height:calc(100vh - var(--topbar-h))}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-p{background:var(--primary);color:#fff;box-shadow:0 0 14px rgba(59,130,246,0.25)}
+.btn-p:not(:disabled):hover{background:var(--primary-dim);box-shadow:0 0 20px rgba(59,130,246,0.4)}
+.btn-d{background:var(--danger);color:#fff}
+.btn-d:not(:disabled):hover{background:#dc2626}
+.btn-s{background:var(--success);color:#fff}
+.btn-s:not(:disabled):hover{background:#059669}
+.btn-o{background:transparent;color:var(--primary);border:1.5px solid rgba(59,130,246,0.4)}
+.btn-o:not(:disabled):hover{background:var(--primary-glow);border-color:var(--primary)}
+.btn-ipfs{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 0 14px rgba(99,102,241,0.3)}
+.btn-ipfs:not(:disabled):hover{box-shadow:0 0 22px rgba(99,102,241,0.5)}
+/* ── VIEW HEADER ── */
+.vhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.vtitle{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.3px;color:#fff}
+/* ── TABS ── */
+.tabs-bar{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--border);margin-bottom:22px}
+.tab-btn{padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:8px}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.tab-active{color:var(--primary);border-bottom-color:var(--primary)}
+.tab-count{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--surface2);color:var(--text-muted);font-family:'JetBrains Mono',monospace}
+.tab-btn.tab-active .tab-count{background:rgba(59,130,246,0.2);color:var(--primary)}
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+/* ── CARD ── */
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;transition:all .2s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),#6366f1);opacity:0;transition:opacity .2s}
+.card:hover{border-color:rgba(59,130,246,0.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.card:hover::before{opacity:1}
+.card.card-completed{border-color:var(--border)}
+.card.card-completed::before{background:linear-gradient(90deg,var(--text-muted),var(--surface3))}
+/* ── CARD: IPFS BANNER ── */
+.card-img{width:100%;height:130px;object-fit:cover;border-radius:8px;margin-bottom:-2px;display:block}
+.card-img-placeholder{width:100%;height:80px;border-radius:8px;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(99,102,241,0.08));border:1px dashed rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted);gap:6px}
+.card-desc{font-size:12px;color:var(--text-dim);line-height:1.55;border-left:2px solid rgba(59,130,246,0.25);padding-left:9px;word-break:break-word}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.card-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}
+.card-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff}
+.card-link{color:var(--primary);font-size:11.5px;font-weight:500;text-decoration:none;cursor:pointer;background:none;border:none;padding:0;font-family:'DM Sans',sans-serif;text-align:left;display:block;margin-top:3px;opacity:.8;transition:opacity .15s}
+.card-link:hover{opacity:1;text-decoration:underline}
+/* ── BADGES ── */
+.bdg{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap;flex-shrink:0}
+.b-active{background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.25)}
+.b-goalmet{background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.25)}
+.b-goalnotmet{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2)}
+.b-withdrawn{background:rgba(100,116,139,0.12);color:#94a3b8;border:1px solid rgba(100,116,139,0.2)}
+.b-failed{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2)}
+.b-reward{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.25)}
+.b-new{background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25);font-size:9px;padding:2px 6px}
+.b-ipfs{background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25)}
+/* ── CARD ROWS ── */
+.row{display:flex;justify-content:space-between;align-items:center}
+.lbl{color:var(--text-muted);font-weight:600;font-size:12px;letter-spacing:.2px}
+.val{font-weight:700;font-size:12.5px;font-family:'JetBrains Mono',monospace;color:var(--text)}
+/* ── PROGRESS ── */
+.prog-wrap{display:flex;flex-direction:column;gap:4px}
+.prog-bg{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#818cf8);transition:width .5s}
+.prog-fill.over{background:linear-gradient(90deg,var(--success),#34d399)}
+.prog-lbl{font-size:11px;color:var(--text-muted);font-weight:600;font-family:'JetBrains Mono',monospace;text-align:right}
+.card-meta{font-size:11.5px;color:var(--text-muted)}
+.card-meta span{color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px}
+/* ── TIME ── */
+.ctime{font-size:11.5px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.t-ok{color:#34d399}.t-end{color:var(--text-muted)}.t-soon{color:#fbbf24}
+.my-bdg{font-size:10px;color:var(--primary);font-weight:700;font-family:'JetBrains Mono',monospace}
+/* ── CARD ACTIONS ── */
+.cact{border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:8px;margin-top:2px}
+.crow{display:flex;gap:8px;align-items:center}
+.cinput{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:12.5px;font-family:'JetBrains Mono',monospace;outline:none;transition:border-color .15s;background:var(--surface);color:var(--text);min-width:0}
+.cinput:focus{border-color:var(--primary)}
+.cinput::placeholder{font-family:'DM Sans',sans-serif;color:var(--text-muted);font-size:12px}
+.cnote{font-size:11.5px;color:var(--text-muted);font-style:italic;text-align:center;padding:4px 0}
+/* ── CONNECT SCREEN ── */
+.cscreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;gap:16px}
+/* ── FORM ── */
+.fcard{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:28px;max-width:560px}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.fg label{font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+.fi{padding:10px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:13.5px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;background:var(--surface);color:var(--text);width:100%}
+.fi:focus{border-color:var(--primary)}
+.fi-ta{resize:vertical;min-height:80px;line-height:1.6}
+.fhint{font-size:11px;color:var(--text-muted);line-height:1.6}
+/* ── IPFS SECTION ── */
+.ipfs-section{
+  border:1px solid rgba(99,102,241,0.25);border-radius:10px;
+  padding:16px;margin-bottom:18px;
+  background:linear-gradient(135deg,rgba(99,102,241,0.05),rgba(139,92,246,0.03));
+}
+.ipfs-section-title{
+  font-size:12px;font-weight:700;color:#a5b4fc;
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;
+  display:flex;align-items:center;gap:7px;
+}
+.ipfs-preview{
+  margin-top:8px;padding:10px 12px;border-radius:8px;
+  background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);
+  font-size:11.5px;color:var(--text-dim);line-height:1.55;
+}
+.ipfs-preview a{color:#a5b4fc;text-decoration:underline}
+.ipfs-uploading{display:flex;align-items:center;gap:8px;font-size:12px;color:#a5b4fc;padding:8px 0}
+/* ── STATS ── */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:26px}
+.scard{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:16px 18px}
+.slbl{font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.sval{font-size:24px;font-weight:800;color:var(--primary);font-family:'Syne',sans-serif}
+.ssub{font-size:10.5px;color:var(--text-muted);margin-top:3px}
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:100%;max-width:460px;box-shadow:0 24px 72px rgba(0,0,0,.5);transform:translateY(16px);transition:transform .2s;max-height:92vh;overflow-y:auto}
+.overlay.open .modal{transform:translateY(0)}
+.mhdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:12px}
+.mtitle{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;line-height:1.3}
+.mclose{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-muted);line-height:1;transition:color .15s;flex-shrink:0}
+.mclose:hover{color:var(--text)}
+/* ── MODAL TABS ── */
+.modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.modal-tab{padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.modal-tab:hover{color:var(--text)}
+.modal-tab.mt-active{color:var(--primary);border-bottom-color:var(--primary)}
+.mbody{display:flex;flex-direction:column;gap:10px}
+.mrow{display:flex;justify-content:space-between;align-items:center}
+.mlbl{font-size:12px;color:var(--text-muted);font-weight:600}
+.mval{font-size:12.5px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text)}
+.mdiv{height:1px;background:var(--border)}
+.msec{font-size:12.5px;font-weight:700;color:var(--text)}
+/* ── MODAL IPFS CONTENT ── */
+.m-ipfs-img{width:100%;max-height:180px;object-fit:cover;border-radius:8px}
+.m-ipfs-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;line-height:1.3}
+.m-ipfs-desc{font-size:13px;color:var(--text-dim);line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.m-ipfs-loading{display:flex;align-items:center;gap:8px;font-size:12px;color:#a5b4fc;padding:8px 0}
+.m-cid-link{font-family:'JetBrains Mono',monospace;font-size:11px;color:#a5b4fc;word-break:break-all}
+.m-cid-link a{color:#a5b4fc}
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:400}
+.toast{padding:11px 16px;border-radius:9px;font-size:12.5px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.3);animation:tIn .25s ease;max-width:340px;line-height:1.4;backdrop-filter:blur(10px)}
+.ts{background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.25)}
+.te{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.25)}
+.ti{background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.25)}
+@keyframes tIn{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
+/* ── SPINNER ── */
+.spin{width:13px;height:13px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:rot .7s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes rot{to{transform:rotate(360deg)}}
+/* ── EMPTY ── */
+.empty{text-align:center;padding:50px 20px;color:var(--text-muted)}
+.ei{font-size:34px;margin-bottom:10px}
+.et{font-size:14px;font-weight:700;color:var(--text-dim)}
+.es{font-size:12.5px;margin-top:4px}
+/* ── SORT NOTE ── */
+.sort-note{font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.sort-dot{width:6px;height:6px;border-radius:50%;background:var(--primary);display:inline-block}
+@media(max-width:700px){
+  #sidebar{width:180px} #main{margin-left:180px;padding:16px 12px}
+  .grid{grid-template-columns:1fr} .sgrid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header id="topbar">
+  <div class="brand">
+    <div class="brand-icon">⛓</div>
+    <div>
+      <div class="brand-title">CrowdFund</div>
+      <div class="brand-sub">Decentralized · Gas-Optimized · IPFS</div>
+    </div>
+  </div>
+  <div class="topbar-right" id="walletArea"></div>
+</header>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <button class="ni" id="nav-dashboard" onclick="go('dashboard')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>
+    Dashboard
+  </button>
+  <button class="ni active" id="nav-browse" onclick="go('browse')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+    Browse Campaigns
+  </button>
+  <button class="ni" id="nav-contributions" style="display:none" onclick="go('contributions')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.343-4 3s1.79 3 4 3 4-1.343 4-3-1.79-3-4-3zm0 0V5m0 13v-3"/></svg>
+    My Contributions
+  </button>
+  <button class="ni" id="nav-mycampaigns" style="display:none" onclick="go('mycampaigns')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    My Campaigns
+  </button>
+  <button class="ni" id="nav-rewards" style="display:none" onclick="go('rewards')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+    My Rewards
+  </button>
+  <div class="nsep" id="nav-sep" style="display:none"></div>
+  <button class="ni" id="nav-create" style="display:none" onclick="go('create')">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    Create Campaign
+  </button>
+</nav>
+
+<!-- MAIN -->
+<main id="main"><div id="view"></div></main>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="detailModal">
+  <div class="modal">
+    <div class="mhdr">
+      <span class="mtitle" id="mTitle">Campaign Detail</span>
+      <button class="mclose" onclick="closeModal()">✕</button>
+    </div>
+    <!-- Tab bar injected by JS -->
+    <div id="mTabs"></div>
+    <div class="mbody" id="mBody"></div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG — update these two values
+═══════════════════════════════════════════════════════════════════ */
+const CONTRACT_ADDRESS = '0xe6AB9b6cF05BAD71285Faf1D43e9E1a439E833A6';  // ← UPDATE to your CrowdFundOptimized deployment address
+
+/*
+  PINATA IPFS CONFIG
+  ──────────────────
+  1. Sign up free at https://pinata.cloud
+  2. Go to API Keys → New Key → check "pinFileToIPFS" and "pinJSONToIPFS"
+  3. Paste your JWT below (starts with "eyJ…")
+  Leave as '' to disable IPFS (campaigns will still work without metadata)
+*/
+const PINATA_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJmMmJlMzMxNi1mYTQwLTRjNzktOGU4Yi1hZTQyNTM4MGNiZDciLCJlbWFpbCI6ImVlMjQwMDAyMDQxQGlpdGkuYWMuaW4iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiMjM4NmQ1YjY4MjRlNGMwYWUyZmYiLCJzY29wZWRLZXlTZWNyZXQiOiI0ZmMyYTI5ZmZlNzA0ZjkyMTUzOTA3NGE5YjI3ZDkzNjQwMmNhMWRmM2NlYmQxMjdmNDg5MWE3ZDMyODJiMGU2IiwiZXhwIjoxODA4NjQ0NjM5fQ.wF5_7qbrt_knPVjn3CW-ViooozgNDkrqxf6bp_y7j2M';   
+const IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';  // or cloudflare-ipfs.com/ipfs/
+
+/* ═══════════════════════════════════════════════════════════════════
+   ABI — aligned with CrowdFundOptimized:
+   · getCampaign returns 5 fields only (metadataCID removed from storage)
+   · metadataCID lives ONLY in the CampaignCreated event log
+   · createCampaign still accepts metadataCID as calldata (not stored)
+═══════════════════════════════════════════════════════════════════ */
+const ABI = [
+  /* contribute */
+  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],"name":"contribute","outputs":[],"stateMutability":"payable","type":"function"},
+  /* createCampaign — goalWei, deadlineTimestamp, metadataCID (calldata only, emitted in event) */
+  {"inputs":[
+    {"internalType":"uint256","name":"_goalWei","type":"uint256"},
+    {"internalType":"uint256","name":"_deadlineTimestamp","type":"uint256"},
+    {"internalType":"string","name":"_metadataCID","type":"string"}
+  ],"name":"createCampaign","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
+  /* withdraw */
+  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},
+  /* refund */
+  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],"name":"refund","outputs":[],"stateMutability":"nonpayable","type":"function"},
+  /* getCampaign — OPTIMIZED: returns 5 values only (goal, raised, deadline, creator, state) */
+  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],
+   "name":"getCampaign",
+   "outputs":[
+     {"internalType":"uint256","name":"goal","type":"uint256"},
+     {"internalType":"uint256","name":"raised","type":"uint256"},
+     {"internalType":"uint256","name":"deadline","type":"uint256"},
+     {"internalType":"address","name":"creator","type":"address"},
+     {"internalType":"uint8","name":"state","type":"uint8"}
+   ],"stateMutability":"view","type":"function"},
+  /* getContribution */
+  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"},{"internalType":"address","name":"contributor","type":"address"}],"name":"getContribution","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+  /* getAllCampaignIds */
+  {"inputs":[],"name":"getAllCampaignIds","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},
+  /* campaignCount */
+  {"inputs":[],"name":"campaignCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+  /* events */
+  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"campaign_id","type":"uint256"},{"indexed":false,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"uint256","name":"goalWei","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"deadlineTimestamp","type":"uint256"},{"indexed":false,"internalType":"string","name":"metadataCID","type":"string"}],"name":"CampaignCreated","type":"event"},
+  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"cmpgn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Contributed","type":"event"},
+  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address payable","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"campaign_id","type":"uint256"}],"name":"FundsWithdrawn","type":"event"},
+  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address payable","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"campaign_id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Refunded","type":"event"},
+  /* fallback + receive */
+  {"stateMutability":"payable","type":"fallback"},
+  {"stateMutability":"payable","type":"receive"}
+];
+
+/* ═══ STATUS ENUM ══════════════════════════════════════════════ */
+const ST = { Active:0, Failed:1, Success:2, Withdrawn:3 };
+
+/* ═══ APP STATE ════════════════════════════════════════════════ */
+let provider=null, signer=null, contract=null;
+let account='', balance='0';
+let campaigns=[];
+let myContribs={};
+let currentView='browse';
+let txLock=false;
+let browseTab='active', myTab='active', contribTab='active';
+
+// IPFS metadata cache: { [cid]: { title, description, image } }
+const ipfsCache = {};
+// CID cache from CampaignCreated events: { [campaignId]: cid }
+const cidFromEvent = {};
+// Current modal tab: 'details' | 'ipfs'
+let modalTab = 'details';
+let modalCampaignId = null;
+
+/* ═══ UTILS ════════════════════════════════════════════════════ */
+function fmtEth(bn) {
+  if (!bn) return '0.0 ETH';
+  try {
+    const n = parseFloat(ethers.utils.formatEther(bn));
+    if (n===0) return '0.0 ETH';
+    if (n<0.00001) return n.toExponential(3)+' ETH';
+    return n.toFixed(4).replace(/\.?0+$/,'')+' ETH';
+  } catch { return (bn||'0').toString()+' wei'; }
+}
+function shortAddr(a) { if (!a) return ''; return a.slice(0,6)+'…'+a.slice(-4); }
+function timeLeft(deadline) {
+  const now=Math.floor(Date.now()/1000), diff=Number(deadline)-now;
+  if (diff<=0) return {label:'Ended',cls:'t-end'};
+  const d=Math.floor(diff/86400),h=Math.floor((diff%86400)/3600),m=Math.floor((diff%3600)/60);
+  if (d>0) return {label:`${d}d ${h}h left`,cls:d<1?'t-soon':'t-ok'};
+  if (h>0) return {label:`${h}h ${m}m left`,cls:h<2?'t-soon':'t-ok'};
+  return {label:`${m}m left`,cls:'t-soon'};
+}
+function getPct(raised,goal) {
+  if (!goal||goal.isZero()) return 0;
+  return Math.round(raised.mul(10000).div(goal).toNumber())/100;
+}
+function statusOf(c) {
+  const s=Number(c.state),now=Math.floor(Date.now()/1000);
+  const expired=now>=Number(c.deadline), goalMet=c.raised.gte(c.goal);
+  if (s===ST.Withdrawn) return {label:'Withdrawn',  cls:'b-withdrawn', key:'withdrawn'};
+  if (s===ST.Success)   return {label:'Goal Met',   cls:'b-goalmet',   key:'goalmet'};
+  if (s===ST.Failed)    return {label:'Failed',     cls:'b-failed',    key:'failed'};
+  if (!expired)         return {label:'Active',     cls:'b-active',    key:'active'};
+  if (expired&&goalMet) return {label:'Goal Met',   cls:'b-goalmet',   key:'goalmet'};
+  return {label:'Goal Not Met',cls:'b-goalnotmet',key:'goalnotmet'};
+}
+function isActiveCampaign(c) {
+  return Number(c.state)===ST.Active && Math.floor(Date.now()/1000)<Number(c.deadline);
+}
+function sortActive(list)    { return [...list].sort((a,b)=>b.id-a.id); }
+function sortCompleted(list) { return [...list].sort((a,b)=>b.id-a.id); }
+
+function errMsg(err) {
+  const m={
+    'InvalidGoal':'Goal must be greater than 0.','InvalidDeadline':'Deadline must be in the future.',
+    'CampaignNotFound':'Campaign does not exist.','CampaignNotActive':'Campaign is no longer active.',
+    'OwnerCannotContribute':'Campaign creator cannot contribute.',
+    'CampaignExpired':'Campaign deadline has already passed.',
+    'ZeroContribution':'Contribution cannot be zero.','AlreadyWithdrawn':'Funds already withdrawn.',
+    'GoalNotReached':'Goal has not been reached.','CampaignStillActive':'Campaign is still active.',
+    'RefundNotAllowed':'Campaign creator cannot claim refund.',
+    'NoContribution':'No contribution found for your address.',
+    'Invalid call':'⚠️ Contract call failed — check CONTRACT_ADDRESS.',
+    'Funds requested invalid':'Goal must be greater than 0.','Deadline invalid':'Deadline must be in the future.',
+    'Campaign does not exist':'Campaign does not exist.','Campaign not active':'Campaign is no longer active.',
+    'Owner cannot contribute':'Creator cannot contribute.','Campaign expired':'Campaign deadline has passed.',
+    'Invalid amount':'Amount must be greater than 0.',
+  };
+  const raw=(err?.reason||err?.data?.message||err?.error?.message||err?.message||'').toString();
+  for (const [k,v] of Object.entries(m)) { if (raw.includes(k)) return v; }
+  if (err?.code===4001||err?.code==='ACTION_REJECTED'||raw.includes('user rejected')) return 'Transaction rejected by user.';
+  if (raw.toLowerCase().includes('insufficient funds')) return 'Insufficient ETH in wallet.';
+  return raw.split('(')[0].trim()||'Transaction failed.';
+}
+
+/* ═══ TOAST ════════════════════════════════════════════════════ */
+function toast(msg,type='info') {
+  const tc=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className=`toast t${type[0]}`;t.textContent=msg;tc.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),350);},4500);
+}
+
+/* ═══ LOADING ══════════════════════════════════════════════════ */
+function setLoading(id,on,label) {
+  const b=document.getElementById(id);if(!b)return;
+  if(on){b.disabled=true;b.dataset.orig=b.innerHTML;b.innerHTML='<span class="spin"></span> Processing…';}
+  else{b.disabled=false;b.innerHTML=b.dataset.orig||label||b.innerHTML;}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   IPFS / PINATA HELPERS
+═══════════════════════════════════════════════════════════════ */
+
+/* Upload a JSON metadata object to Pinata, return the CID string */
+async function uploadMetadataToPinata(metadata) {
+  if (!PINATA_JWT) throw new Error('PINATA_JWT is not configured.');
+  const res = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${PINATA_JWT}`
+    },
+    body: JSON.stringify({
+      pinataContent: metadata,
+      pinataMetadata: { name: `CrowdFund_Campaign_${Date.now()}` }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('Pinata upload failed: ' + err);
+  }
+  const data = await res.json();
+  return data.IpfsHash; // this is the CID
+}
+
+/* Upload an image file to Pinata, return the CID string */
+async function uploadImageToPinata(file) {
+  if (!PINATA_JWT) throw new Error('PINATA_JWT is not configured.');
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('pinataMetadata', JSON.stringify({ name: file.name }));
+  const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
+    body: formData
+  });
+  if (!res.ok) throw new Error('Image upload failed: ' + await res.text());
+  const data = await res.json();
+  return data.IpfsHash;
+}
+
+/* Fetch and cache metadata from IPFS given a CID */
+async function fetchIPFSMeta(cid) {
+  if (!cid) return null;
+  if (ipfsCache[cid]) return ipfsCache[cid];
+  try {
+    const res = await fetch(IPFS_GATEWAY + cid, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    ipfsCache[cid] = data;
+    return data;
+  } catch(e) {
+    console.warn('IPFS fetch failed for', cid, e);
+    return null;
+  }
+}
+
+/* ═══ WALLET ════════════════════════════════════════════════════ */
+async function connectWallet() {
+  if (!window.ethereum){toast('MetaMask not detected.','error');return;}
+  try {
+    await ensureSepolia();
+    const accs=await window.ethereum.request({method:'eth_requestAccounts'});
+    await initWallet(accs[0]);
+  } catch(err){toast(errMsg(err),'error');}
+}
+
+async function initWallet(addr) {
+  try {
+    const chainId=await window.ethereum.request({method:'eth_chainId'});
+    if (chainId!=='0xaa36a7'){toast('⚠️ Please switch MetaMask to Sepolia Testnet','error');return;}
+    account=addr.toLowerCase();
+    provider=new ethers.providers.Web3Provider(window.ethereum);
+    signer=provider.getSigner();
+    contract=new ethers.Contract(CONTRACT_ADDRESS,ABI,signer);
+    const bal=await provider.getBalance(account);
+    balance=parseFloat(ethers.utils.formatEther(bal)).toFixed(4);
+    showAuthNav(true);renderWallet();
+    toast('Wallet connected: '+shortAddr(account),'success');
+    await loadCampaigns();render();
+  } catch(err){toast(errMsg(err),'error');console.error('initWallet:',err);}
+}
+
+async function ensureSepolia() {
+  const sepolia='0xaa36a7';
+  const current=await window.ethereum.request({method:'eth_chainId'});
+  if (current!==sepolia) {
+    try {
+      await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:sepolia}]});
+    } catch(err) {
+      if (err.code===4902) {
+        await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:sepolia,chainName:'Sepolia Test Network',rpcUrls:['https://rpc.sepolia.org'],nativeCurrency:{name:'Sepolia ETH',symbol:'ETH',decimals:18},blockExplorerUrls:['https://sepolia.etherscan.io']}]});
+      } else throw err;
+    }
+  }
+}
+
+function logout() {
+  account='';balance='0';signer=null;contract=null;provider=null;
+  campaigns=[];myContribs={};currentView='browse';browseTab='active';
+  showAuthNav(false);renderWallet();render();
+}
+function showAuthNav(show) {
+  const d=show?'':'none';
+  ['nav-contributions','nav-mycampaigns','nav-rewards','nav-create','nav-sep']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=d;});
+}
+function renderWallet() {
+  const el=document.getElementById('walletArea');
+  if (!account) {
+    el.innerHTML=`<button class="btn btn-p" onclick="connectWallet()">🦊 Connect MetaMask</button>`;
+  } else {
+    el.innerHTML=`
+      <div class="bal-chip"><div><div class="bal-lbl">Balance</div><div class="bal-val">${balance} ETH</div></div></div>
+      <div class="addr-chip">${shortAddr(account)}</div>
+      <button class="btn btn-d" onclick="logout()">Logout</button>`;
+  }
+}
+if (window.ethereum) {
+  window.ethereum.on('accountsChanged',accs=>{if(accs?.length>0)initWallet(accs[0]);else logout();});
+  window.ethereum.on('chainChanged',()=>window.location.reload());
+}
+
+/* ═══ LOAD CAMPAIGNS ═══════════════════════════════════════════ */
+async function loadCampaigns() {
+  if (!contract) return;
+  try {
+    let ids=[];
+    try { const raw=await contract.getAllCampaignIds(); ids=raw.map(x=>x.toNumber()); }
+    catch { const cnt=await contract.campaignCount(); ids=Array.from({length:cnt.toNumber()},(_,i)=>i); }
+
+    // ── OPTIMIZED CONTRACT: metadataCID is NOT stored on-chain.
+    //    Fetch CIDs from CampaignCreated event logs (one queryFilter call).
+    try {
+      const filter = contract.filters.CampaignCreated();
+      const logs   = await contract.queryFilter(filter, 0, 'latest');
+      logs.forEach(log => {
+        const id  = log.args.campaign_id.toNumber();
+        const cid = log.args.metadataCID || '';
+        if (cid) cidFromEvent[id] = cid;
+      });
+    } catch(e) {
+      console.warn('Could not fetch CampaignCreated events for CIDs:', e);
+    }
+
+    const results=await Promise.allSettled(
+      ids.map(id=>contract.getCampaign(id).then(r=>({
+        id,
+        goal:     r.goal,
+        raised:   r.raised,
+        deadline: r.deadline.toNumber(),
+        creator:  r.creator.toLowerCase(),
+        state:    r.state,
+        cid:      cidFromEvent[id] || ''   // ← CID sourced from event log, not storage
+      })))
+    );
+
+    campaigns=results.filter(r=>r.status==='fulfilled').map(r=>r.value);
+
+    // Pre-fetch IPFS metadata for all campaigns that have a CID (non-blocking)
+    campaigns.forEach(c => { if (c.cid) fetchIPFSMeta(c.cid).catch(()=>{}); });
+
+    if (account) {
+      myContribs={};
+      await Promise.allSettled(
+        campaigns.map(async c=>{
+          try {
+            const amt=await contract.getContribution(c.id,account);
+            if (!amt.isZero()) myContribs[c.id]=amt;
+          } catch {}
+        })
+      );
+    }
+  } catch(err) {
+    console.error('loadCampaigns:',err);
+    toast('Failed to load campaigns: '+errMsg(err),'error');
+  }
+}
+
+async function refreshAll() {
+  toast('Refreshing…','info');
+  await loadCampaigns();render();
+  toast('Refreshed!','success');
+}
+async function refreshBal() {
+  if (!provider||!account) return;
+  try { const bal=await provider.getBalance(account); balance=parseFloat(ethers.utils.formatEther(bal)).toFixed(4); renderWallet(); } catch {}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTRACT ACTIONS
+═══════════════════════════════════════════════════════════════ */
+
+/* ── CREATE CAMPAIGN (with optional IPFS upload) ── */
+async function doCreate() {
+  if (!contract){toast('Please connect your wallet.','error');return;}
+  if (txLock) return;
+
+  const goalEthStr = document.getElementById('cGoal')?.value?.trim();
+  const deadlineStr= document.getElementById('cDeadline')?.value;
+  const titleStr   = document.getElementById('cTitle')?.value?.trim();
+  const descStr    = document.getElementById('cDesc')?.value?.trim();
+  const imgFile    = document.getElementById('cImg')?.files?.[0];
+
+  if (!goalEthStr||isNaN(goalEthStr)||parseFloat(goalEthStr)<=0){toast('Enter a valid goal amount in ETH.','error');return;}
+  if (!deadlineStr){toast('Please select a deadline.','error');return;}
+  const deadlineTs=Math.floor(new Date(deadlineStr).getTime()/1000);
+  if (deadlineTs<=Math.floor(Date.now()/1000)){toast('Deadline must be in the future.','error');return;}
+
+  const hasIPFS = !!(titleStr || descStr || imgFile);
+  const ipfsEnabled = !!PINATA_JWT;
+
+  txLock=true; setLoading('createBtn',true);
+
+  let metadataCID = '';
+
+  // Step 1: Upload to IPFS if we have a title/desc/image AND Pinata is configured
+  if (hasIPFS && ipfsEnabled) {
+    try {
+      showCreateStatus('📤 Uploading metadata to IPFS via Pinata…');
+      let imageCID = '';
+      if (imgFile) {
+        showCreateStatus('🖼 Uploading image to IPFS…');
+        imageCID = await uploadImageToPinata(imgFile);
+      }
+      const metadata = {
+        title:       titleStr || `Campaign #${campaigns.length}`,
+        description: descStr  || '',
+        image:       imageCID ? (IPFS_GATEWAY + imageCID) : '',
+        createdAt:   new Date().toISOString()
+      };
+      showCreateStatus('📄 Pinning metadata JSON…');
+      metadataCID = await uploadMetadataToPinata(metadata);
+      showCreateStatus('✅ IPFS upload complete! CID: ' + metadataCID.slice(0,16) + '…');
+    } catch(err) {
+      console.error('IPFS upload error:', err);
+      toast('⚠️ IPFS upload failed: ' + err.message + ' — creating campaign without metadata.', 'error');
+      metadataCID = '';
+    }
+  } else if (hasIPFS && !ipfsEnabled) {
+    toast('ℹ️ PINATA_JWT not set — campaign created without IPFS metadata.', 'info');
+  }
+
+  // Step 2: Send transaction to blockchain
+  try {
+    showCreateStatus('⛓ Sending transaction to blockchain…');
+    const goalWei=ethers.utils.parseEther(goalEthStr);
+    const tx=await contract.createCampaign(goalWei, deadlineTs, metadataCID);
+    toast('Transaction submitted…','info');
+    const receipt=await tx.wait();
+    // Cache the CID from the CampaignCreated event immediately (optimized contract stores CID only in event log)
+    try {
+      const iface = contract.interface;
+      for (const log of receipt.logs) {
+        try {
+          const parsed = iface.parseLog(log);
+          if (parsed.name === 'CampaignCreated') {
+            const newId  = parsed.args.campaign_id.toNumber();
+            const newCid = parsed.args.metadataCID || '';
+            if (newCid) cidFromEvent[newId] = newCid;
+          }
+        } catch {}
+      }
+    } catch {}
+    toast('✅ Campaign created! Tx: '+receipt.transactionHash.slice(0,14)+'…','success');
+    // clear form
+    ['cGoal','cDeadline','cTitle','cDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    const imgEl=document.getElementById('cImg'); if(imgEl) imgEl.value='';
+    hideCreateStatus();
+    await loadCampaigns(); go('browse');
+  } catch(err){console.error(err);toast('❌ '+errMsg(err),'error');hideCreateStatus();}
+
+  txLock=false; setLoading('createBtn',false,'Create Campaign');
+}
+
+function showCreateStatus(msg) {
+  const el=document.getElementById('createStatus');
+  if(el){el.style.display='flex';el.innerHTML=`<span class="spin"></span> ${msg}`;}
+}
+function hideCreateStatus() {
+  const el=document.getElementById('createStatus');
+  if(el) el.style.display='none';
+}
+
+/* ── CONTRIBUTE ── */
+async function doContribute(campaignId,inputId,btnId) {
+  if (!contract){toast('Please connect your wallet.','error');return;}
+  if (txLock) return;
+  const input=document.getElementById(inputId);
+  const ethAmt=input?.value?.trim();
+  if (!ethAmt||isNaN(ethAmt)||parseFloat(ethAmt)<=0){toast('Enter a valid ETH amount.','error');return;}
+  txLock=true;setLoading(btnId,true);
+  try {
+    const weiAmt=ethers.utils.parseEther(ethAmt);
+    const tx=await contract.contribute(campaignId,{value:weiAmt});
+    toast('Contribution submitted…','info');
+    await tx.wait();
+    toast(`✅ Contributed ${ethAmt} ETH to Campaign #${campaignId}!`,'success');
+    if(input)input.value='';
+    closeModal();await loadCampaigns();await refreshBal();render();
+  } catch(err){console.error(err);toast('❌ '+errMsg(err),'error');}
+  txLock=false;setLoading(btnId,false,'Contribute');
+}
+
+/* ── WITHDRAW ── */
+async function doWithdraw(campaignId,btnId) {
+  if (!contract){toast('Please connect your wallet.','error');return;}
+  if (txLock) return;
+  txLock=true;setLoading(btnId,true);
+  try {
+    const tx=await contract.withdraw(campaignId);
+    toast('Withdrawal submitted…','info');
+    await tx.wait();
+    toast('✅ Funds withdrawn!','success');
+    closeModal();await loadCampaigns();await refreshBal();render();
+  } catch(err){console.error(err);toast('❌ '+errMsg(err),'error');}
+  txLock=false;setLoading(btnId,false,'💰 Withdraw Funds');
+}
+
+/* ── REFUND ── */
+async function doRefund(campaignId,btnId) {
+  if (!contract){toast('Please connect your wallet.','error');return;}
+  if (txLock) return;
+  txLock=true;setLoading(btnId,true);
+  try {
+    const tx=await contract.refund(campaignId);
+    toast('Refund submitted…','info');
+    await tx.wait();
+    toast('✅ Refund received!','success');
+    closeModal();await loadCampaigns();await refreshBal();render();
+  } catch(err){console.error(err);toast('❌ '+errMsg(err),'error');}
+  txLock=false;setLoading(btnId,false,'↩ Claim Refund');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL — two-tab: Details/Actions + IPFS Info
+═══════════════════════════════════════════════════════════════ */
+function openDetail(id) {
+  const c=campaigns.find(x=>x.id===id);
+  if (!c) return;
+  modalCampaignId=id;
+  modalTab='details';
+  renderModal(c);
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function switchModalTab(tab) {
+  modalTab=tab;
+  const c=campaigns.find(x=>x.id===modalCampaignId);
+  if(c) renderModal(c);
+}
+
+function renderModal(c) {
+  const hasCID = !!c.cid;
+  const meta = c.cid ? (ipfsCache[c.cid]||null) : null;
+
+  // Title: prefer IPFS title
+  const displayTitle = (meta?.title) || `Campaign #${c.id}`;
+  document.getElementById('mTitle').textContent = displayTitle;
+
+  // Tab bar
+  const tabsEl = document.getElementById('mTabs');
+  tabsEl.innerHTML = `
+    <div class="modal-tabs">
+      <button class="modal-tab ${modalTab==='details'?'mt-active':''}" onclick="switchModalTab('details')">📊 Details & Actions</button>
+      <button class="modal-tab ${modalTab==='ipfs'?'mt-active':''}" onclick="switchModalTab('ipfs')">
+        🪐 Campaign Info ${hasCID?'<span class="bdg b-ipfs" style="font-size:9px;padding:1px 6px">IPFS</span>':''}
+      </button>
+    </div>`;
+
+  if (modalTab==='details') {
+    renderModalDetails(c);
+  } else {
+    renderModalIPFS(c, meta);
+  }
+}
+
+function renderModalDetails(c) {
+  const st=statusOf(c),p=getPct(c.raised,c.goal),over=p>=100;
+  const ti=timeLeft(c.deadline),isOwner=account&&c.creator===account;
+  const myAmt=myContribs[c.id]||ethers.BigNumber.from(0);
+  const now=Math.floor(Date.now()/1000),ended=now>Number(c.deadline);
+  const s=Number(c.state);
+
+  let act='<div class="mdiv"></div>';
+  if (!account) {
+    act+=`<p class="cnote">Connect your wallet to interact.</p>`;
+  } else if (isOwner&&s===ST.Active&&!ended) {
+    act+=`<p class="cnote" style="color:var(--primary)">👤 You are the creator of this campaign.</p>`;
+  } else if (!isOwner&&s===ST.Active&&!ended) {
+    act+=`<div class="msec">Contribute to this Campaign</div>
+      <div class="crow">
+        <input class="cinput" id="mInput" type="number" step="0.001" min="0.001" placeholder="Amount in ETH"/>
+        <button class="btn btn-p" id="mCBtn" onclick="doContribute(${c.id},'mInput','mCBtn')">Contribute</button>
+      </div>`;
+  } else if (isOwner&&ended&&(s===ST.Active||s===ST.Success)&&c.raised.gte(c.goal)) {
+    act+=`<button class="btn btn-s" style="width:100%" id="mWBtn" onclick="doWithdraw(${c.id},'mWBtn')">💰 Withdraw Funds</button>`;
+  } else if (!isOwner&&ended&&s!==ST.Success&&s!==ST.Withdrawn&&!myAmt.isZero()) {
+    act+=`<button class="btn btn-d" style="width:100%" id="mRBtn" onclick="doRefund(${c.id},'mRBtn')">↩ Claim Refund</button>`;
+  } else if (s===ST.Withdrawn) {
+    act+=`<p class="cnote" style="color:var(--success)">✅ Creator has withdrawn the funds.</p>`;
+  } else if (!isOwner&&ended&&myAmt.isZero()&&s!==ST.Success&&s!==ST.Withdrawn) {
+    act+=`<p class="cnote">No contribution found for your address.</p>`;
+  }
+
+  document.getElementById('mBody').innerHTML=`
+    <div class="mrow"><span class="mlbl">Status</span><span class="bdg ${st.cls}">${st.label}</span></div>
+    <div class="mdiv"></div>
+    <div class="mrow"><span class="mlbl">Campaign ID</span><span class="mval">#${c.id}</span></div>
+    <div class="mrow"><span class="mlbl">Creator</span><span class="mval">${shortAddr(c.creator)}${isOwner?' <span style="color:var(--primary)">(You)</span>':''}</span></div>
+    <div class="mrow"><span class="mlbl">Goal</span><span class="mval">${fmtEth(c.goal)}</span></div>
+    <div class="mrow"><span class="mlbl">Total Raised</span><span class="mval" style="color:${over?'var(--success)':'inherit'}">${fmtEth(c.raised)}</span></div>
+    <div class="mrow"><span class="mlbl">Progress</span><span class="mval" style="color:${over?'var(--success)':'var(--primary)'}">${p.toFixed(1)}%</span></div>
+    <div><div class="prog-bg"><div class="prog-fill ${over?'over':''}" style="width:${Math.min(p,100)}%"></div></div></div>
+    <div class="mrow"><span class="mlbl">Deadline</span><span style="font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace">${new Date(c.deadline*1000).toLocaleString()}</span></div>
+    <div class="mrow"><span class="mlbl">Time</span><span class="ctime ${ti.cls}">${ti.label}</span></div>
+    ${!myAmt.isZero()?`<div class="mdiv"></div><div class="mrow"><span class="mlbl">Your Contribution</span><span class="mval" style="color:var(--primary)">${fmtEth(myAmt)}</span></div>`:''}
+    ${act}`;
+}
+
+function renderModalIPFS(c, meta) {
+  const hasCID = !!c.cid;
+
+  let content = '';
+  if (!hasCID) {
+    content = `
+      <div class="empty" style="padding:30px 10px">
+        <div class="ei">🪐</div>
+        <div class="et">No IPFS metadata</div>
+        <div class="es">The creator did not attach IPFS metadata to this campaign.</div>
+      </div>`;
+  } else if (!meta) {
+    // CID exists but not yet loaded — trigger async load and show spinner
+    content = `
+      <div class="m-ipfs-loading"><span class="spin"></span> Fetching metadata from IPFS…</div>
+      <div class="mdiv"></div>
+      <div class="mrow"><span class="mlbl">CID</span>
+        <span class="m-cid-link"><a href="${IPFS_GATEWAY+c.cid}" target="_blank" rel="noopener">${c.cid.slice(0,20)}…</a></span>
+      </div>`;
+    // Try to load and re-render
+    fetchIPFSMeta(c.cid).then(loaded => {
+      if (loaded && modalCampaignId===c.id && modalTab==='ipfs') {
+        renderModal(c);
+      }
+    });
+  } else {
+    // Fully loaded
+    content = `
+      ${meta.image ? `<img class="m-ipfs-img" src="${meta.image}" alt="campaign image" onerror="this.style.display='none'"/>` : ''}
+      ${meta.title ? `<div class="m-ipfs-title">${meta.title}</div>` : ''}
+      ${meta.description ? `<div class="m-ipfs-desc">${meta.description}</div>` : ''}
+      <div class="mdiv"></div>
+      <div class="mrow">
+        <span class="mlbl">IPFS CID</span>
+        <span class="m-cid-link"><a href="${IPFS_GATEWAY+c.cid}" target="_blank" rel="noopener">${c.cid.slice(0,20)}…</a></span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl">Gateway Link</span>
+        <a style="font-size:11px;color:#a5b4fc" href="${IPFS_GATEWAY+c.cid}" target="_blank">View raw JSON ↗</a>
+      </div>
+      ${meta.createdAt ? `<div class="mrow"><span class="mlbl">Created</span><span class="mval" style="font-size:11px">${new Date(meta.createdAt).toLocaleDateString()}</span></div>` : ''}`;
+  }
+
+  document.getElementById('mBody').innerHTML = content;
+}
+
+function closeModal() { document.getElementById('detailModal').classList.remove('open'); modalCampaignId=null; }
+document.getElementById('detailModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+/* ═══ NAV ════════════════════════════════════════════════════ */
+function go(view) {
+  currentView=view;
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('nav-'+view);
+  if(btn)btn.classList.add('active');
+  render();
+}
+function switchTab(tabVar,tabVal) {
+  if(tabVar==='browseTab')browseTab=tabVal;
+  else if(tabVar==='myTab')myTab=tabVal;
+  else if(tabVar==='contribTab')contribTab=tabVal;
+  render();
+}
+
+/* ═══ CARD HTML ══════════════════════════════════════════════ */
+function cardHTML(c,isNewBadge) {
+  const st=statusOf(c),p=getPct(c.raised,c.goal),over=p>=100;
+  const ti=timeLeft(c.deadline),isOwner=account&&c.creator===account;
+  const myAmt=myContribs[c.id]||ethers.BigNumber.from(0);
+  const now=Math.floor(Date.now()/1000),ended=now>Number(c.deadline);
+  const s=Number(c.state),active=isActiveCampaign(c);
+
+  // IPFS metadata (if already cached)
+  const meta = c.cid ? (ipfsCache[c.cid]||null) : null;
+  const displayTitle = meta?.title || `ID–${String(1000+c.id).padStart(4,'0')}`;
+  const descSnippet  = meta?.description ? (meta.description.length>90 ? meta.description.slice(0,90)+'…' : meta.description) : '';
+  const imgSrc       = meta?.image || '';
+
+  let actions='';
+  if (account) {
+    if (active&&!isOwner) {
+      actions=`<div class="cact"><div class="crow">
+        <input class="cinput" id="ci${c.id}" type="number" step="0.001" min="0.001" placeholder="ETH amount"/>
+        <button class="btn btn-p" id="cb${c.id}" onclick="doContribute(${c.id},'ci${c.id}','cb${c.id}')">Contribute</button>
+      </div></div>`;
+    } else if (isOwner&&ended&&(s===ST.Active||s===ST.Success)&&c.raised.gte(c.goal)) {
+      actions=`<div class="cact"><button class="btn btn-s" style="width:100%" id="wb${c.id}" onclick="doWithdraw(${c.id},'wb${c.id}')">💰 Withdraw Funds</button></div>`;
+    } else if (!isOwner&&ended&&s!==ST.Success&&s!==ST.Withdrawn&&!myAmt.isZero()) {
+      actions=`<div class="cact"><button class="btn btn-d" style="width:100%" id="rb${c.id}" onclick="doRefund(${c.id},'rb${c.id}')">↩ Claim Refund</button></div>`;
+    } else if (!isOwner&&ended&&s!==ST.Success&&s!==ST.Withdrawn&&myAmt.isZero()) {
+      actions=`<div class="cact"><p class="cnote">No contribution to refund.</p></div>`;
+    } else if (isOwner&&active) {
+      actions=`<div class="cact"><p class="cnote">You are the creator</p></div>`;
+    }
+  }
+
+  return `
+    <div class="card${active?'':' card-completed'}">
+      ${imgSrc ? `<img class="card-img" src="${imgSrc}" alt="campaign" loading="lazy" onerror="this.style.display='none'"/>` : (c.cid ? `<div class="card-img-placeholder">🪐 IPFS metadata attached</div>` : '')}
+      <div class="card-top">
+        <div>
+          <div class="card-id">Campaign #${c.id} ${c.cid?'<span class="bdg b-ipfs" style="font-size:9px;padding:1px 5px;vertical-align:middle">IPFS</span>':''}</div>
+          <div class="card-name" style="display:flex;align-items:center;gap:6px">
+            ${displayTitle}
+            ${isNewBadge?'<span class="bdg b-new">NEW</span>':''}
+          </div>
+          <button class="card-link" onclick="openDetail(${c.id})">View full details →</button>
+        </div>
+        <span class="bdg ${st.cls}">${st.label}</span>
+      </div>
+      ${descSnippet ? `<div class="card-desc">${descSnippet}</div>` : ''}
+      <div class="row"><span class="lbl">Goal</span><span class="val">${fmtEth(c.goal)}</span></div>
+      <div class="row"><span class="lbl">Pledged</span><span class="val" style="${over?'color:var(--success)':''}">${fmtEth(c.raised)}</span></div>
+      <div class="prog-wrap">
+        <div class="prog-bg"><div class="prog-fill ${over?'over':''}" style="width:${Math.min(p,100)}%"></div></div>
+        <div class="prog-lbl">${p.toFixed(0)}%</div>
+      </div>
+      <div class="row">
+        <span class="card-meta">By <span>${shortAddr(c.creator)}</span></span>
+        <span class="ctime ${ti.cls}">${ti.label}</span>
+      </div>
+      ${!myAmt.isZero()?`<div style="font-size:10.5px;color:var(--primary);font-weight:700">✓ You contributed ${fmtEth(myAmt)}</div>`:''}
+      ${actions}
+    </div>`;
+}
+
+/* ═══ TAB GRID BUILDER ═══════════════════════════════════════ */
+function buildTabGrid(allList,tabVar,currentTab,emptyActiveMsg,emptyCompletedMsg) {
+  const activeList=sortActive(allList.filter(c=>isActiveCampaign(c)));
+  const completedList=sortCompleted(allList.filter(c=>!isActiveCampaign(c)));
+  const aCnt=activeList.length,cCnt=completedList.length;
+  const tabs=`<div class="tabs-bar">
+    <button class="tab-btn ${currentTab==='active'?'tab-active':''}" onclick="switchTab('${tabVar}','active')">🟢 Active <span class="tab-count">${aCnt}</span></button>
+    <button class="tab-btn ${currentTab==='completed'?'tab-active':''}" onclick="switchTab('${tabVar}','completed')">🏁 Completed <span class="tab-count">${cCnt}</span></button>
+  </div>`;
+  if (currentTab==='active') {
+    if (aCnt===0) return tabs+`<div class="empty"><div class="ei">🟢</div><div class="et">${emptyActiveMsg}</div><div class="es">Active campaigns accepting contributions will appear here.</div></div>`;
+    const note=`<div class="sort-note"><span class="sort-dot"></span>Sorted by newest first (Campaign #${activeList[0].id} → #${activeList[aCnt-1].id})</div>`;
+    return tabs+note+`<div class="grid">${activeList.map((c,i)=>cardHTML(c,i===0&&aCnt>1)).join('')}</div>`;
+  } else {
+    if (cCnt===0) return tabs+`<div class="empty"><div class="ei">🏁</div><div class="et">${emptyCompletedMsg}</div><div class="es">Ended, withdrawn, or failed campaigns appear here.</div></div>`;
+    const note=`<div class="sort-note"><span class="sort-dot"></span>Sorted by most recent · ${cCnt} campaign${cCnt!==1?'s':''} completed</div>`;
+    return tabs+note+`<div class="grid">${completedList.map(c=>cardHTML(c,false)).join('')}</div>`;
+  }
+}
+
+/* ═══ VIEWS ══════════════════════════════════════════════════ */
+function vConnect() {
+  return `<div class="cscreen">
+    <div style="font-size:54px;filter:drop-shadow(0 0 24px rgba(59,130,246,0.4))">⛓</div>
+    <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff">CrowdFund dApp</div>
+    <div style="color:var(--text-muted);font-size:14px;max-width:380px;line-height:1.7;text-align:center">
+      Connect your MetaMask wallet to browse campaigns, contribute ETH, create campaigns, and claim refunds — fully on-chain with IPFS metadata. Running on the gas-optimized <code>CrowdFundOptimized</code> contract.
+    </div>
+    <button class="btn btn-p" style="padding:11px 28px;font-size:14px;margin-top:8px" onclick="connectWallet()">🦊 Connect MetaMask</button>
+    <p style="color:var(--text-muted);font-size:11px;font-family:'JetBrains Mono',monospace">Network: Sepolia Testnet (chainId 0xaa36a7)</p>
+  </div>`;
+}
+
+function vDashboard() {
+  const total=campaigns.length,active=campaigns.filter(c=>isActiveCampaign(c)).length;
+  const mine=campaigns.filter(c=>c.creator===account).length,cCount=Object.keys(myContribs).length;
+  const totalRaised=campaigns.reduce((s,c)=>s.add(c.raised),ethers.BigNumber.from(0));
+  const ipfsCount=campaigns.filter(c=>!!c.cid).length;
+  return `
+    <div class="vhdr"><h2 class="vtitle">Dashboard</h2><button class="btn btn-o" onclick="refreshAll()">↻ Refresh</button></div>
+    <div class="sgrid">
+      <div class="scard"><div class="slbl">Total Campaigns</div><div class="sval">${total}</div><div class="ssub">On blockchain</div></div>
+      <div class="scard"><div class="slbl">Active</div><div class="sval" style="color:var(--success)">${active}</div><div class="ssub">Accepting funds</div></div>
+      <div class="scard"><div class="slbl">Completed</div><div class="sval" style="color:var(--text-muted)">${total-active}</div><div class="ssub">Ended campaigns</div></div>
+      <div class="scard"><div class="slbl">My Campaigns</div><div class="sval">${mine}</div><div class="ssub">Created by you</div></div>
+      <div class="scard"><div class="slbl">My Contributions</div><div class="sval">${cCount}</div><div class="ssub">Campaigns backed</div></div>
+      <div class="scard"><div class="slbl">IPFS Metadata</div><div class="sval" style="color:#a5b4fc">${ipfsCount}</div><div class="ssub">Campaigns with metadata</div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff">Recent Active Campaigns</h3>
+      <button class="btn btn-o" onclick="go('browse')">Browse all →</button>
+    </div>
+    <div class="grid">${sortActive(campaigns.filter(c=>isActiveCampaign(c))).slice(0,6).map((c,i)=>cardHTML(c,i===0)).join('')||'<div class="empty"><div class="ei">📭</div><div class="et">No active campaigns</div></div>'}</div>`;
+}
+
+function vBrowse() {
+  return `<div class="vhdr"><h2 class="vtitle">All Campaigns</h2><button class="btn btn-p" onclick="refreshAll()">↻ Refresh</button></div>
+    ${buildTabGrid(campaigns,'browseTab',browseTab,'No active campaigns','No completed campaigns yet')}`;
+}
+function vMyCampaigns() {
+  const mine=campaigns.filter(c=>c.creator===account);
+  return `<div class="vhdr"><h2 class="vtitle">My Campaigns</h2><button class="btn btn-p" onclick="go('create')">+ New Campaign</button></div>
+    ${buildTabGrid(mine,'myTab',myTab,'None of your campaigns are active','None of your campaigns have ended yet')}`;
+}
+function vContributions() {
+  const ids=Object.keys(myContribs).map(Number);
+  const list=campaigns.filter(c=>ids.includes(c.id));
+  return `<div class="vhdr"><h2 class="vtitle">My Contributions</h2></div>
+    ${buildTabGrid(list,'contribTab',contribTab,'No active campaigns you contributed to','No completed campaigns you contributed to')}`;
+}
+function vRewards() {
+  const ids=Object.keys(myContribs).map(Number);
+  const eligible=campaigns.filter(c=>ids.includes(c.id)&&(Number(c.state)===ST.Success||Number(c.state)===ST.Withdrawn));
+  return `<div class="vhdr"><h2 class="vtitle">My Rewards</h2></div>
+    ${eligible.length===0
+      ?`<div class="empty"><div class="ei">🏆</div><div class="et">No rewards yet</div><div class="es">Contribute to campaigns that meet their goal.</div></div>`
+      :`<div class="grid">${eligible.map(c=>{
+          const amt=myContribs[c.id]||ethers.BigNumber.from(0);
+          const meta=c.cid?(ipfsCache[c.cid]||null):null;
+          return `<div class="card card-completed">
+            <div class="card-top">
+              <div><div class="card-id">Campaign #${c.id}</div>
+              <div class="card-name">${meta?.title||`ID–${String(1000+c.id).padStart(4,'0')}`}</div>
+              <button class="card-link" onclick="openDetail(${c.id})">View details →</button></div>
+              <span class="bdg b-reward">🏆 Reward</span>
+            </div>
+            <div class="row"><span class="lbl">Goal</span><span class="val">${fmtEth(c.goal)}</span></div>
+            <div class="row"><span class="lbl">Your Contribution</span><span class="val" style="color:var(--primary)">${fmtEth(amt)}</span></div>
+            <p style="font-size:11px;color:var(--success);font-weight:700">✅ You backed a successful campaign!</p>
+          </div>`;
+        }).join('')}</div>`}`;
+}
+
+/* ── CREATE VIEW — with IPFS fields ── */
+function vCreate() {
+  const minDt=new Date(Date.now()+120000).toISOString().slice(0,16);
+  const ipfsConfigured=!!PINATA_JWT;
+  return `
+    <div class="vhdr"><h2 class="vtitle">Create Campaign</h2></div>
+    <div class="fcard">
+      <!-- On-chain fields -->
+      <div class="fg">
+        <label>Campaign Goal (ETH)</label>
+        <input class="fi" id="cGoal" type="number" step="0.001" min="0.001" placeholder="e.g. 1.5"/>
+        <span class="fhint">Minimum funding goal in ETH. Stored as wei (uint256) in the contract.</span>
+      </div>
+      <div class="fg">
+        <label>Deadline</label>
+        <input class="fi" id="cDeadline" type="datetime-local" min="${minDt}"/>
+        <span class="fhint">Must be in the future. Contributors can claim refunds after deadline if goal is not met.</span>
+      </div>
+
+      <!-- IPFS / off-chain metadata section -->
+      <div class="ipfs-section">
+        <div class="ipfs-section-title">
+          <span>🪐</span> Campaign Metadata — stored on IPFS
+          ${ipfsConfigured
+            ? '<span class="bdg b-ipfs" style="font-size:10px">Pinata Connected</span>'
+            : '<span class="bdg b-failed" style="font-size:10px">PINATA_JWT not set</span>'}
+        </div>
+        <div class="fg" style="margin-bottom:12px">
+          <label>Campaign Title</label>
+          <input class="fi" id="cTitle" type="text" maxlength="80" placeholder="A short, memorable name"/>
+          <span class="fhint">Displayed on campaign cards. Stored permanently on IPFS — cannot be changed later.</span>
+        </div>
+        <div class="fg" style="margin-bottom:12px">
+          <label>Description</label>
+          <textarea class="fi fi-ta" id="cDesc" maxlength="600" placeholder="What are you building? Why should people contribute?"></textarea>
+          <span class="fhint">Max 600 characters. Shown in campaign detail popup.</span>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Cover Image (optional)</label>
+          <input class="fi" id="cImg" type="file" accept="image/*" style="padding:8px"/>
+          <span class="fhint">Uploaded to IPFS. Shown as campaign card banner. PNG/JPG, max ~5MB recommended.</span>
+        </div>
+        ${!ipfsConfigured?`<div class="ipfs-preview" style="margin-top:10px;color:var(--text-muted)">
+          ⚠️ <strong>PINATA_JWT is not set</strong> — title/description/image will NOT be uploaded to IPFS.
+          The campaign will still be created on-chain with an empty metadataCID.
+          <br/>To enable IPFS: set PINATA_JWT at the top of this file.
+        </div>`:''}
+      </div>
+
+      <!-- Status line -->
+      <div id="createStatus" class="ipfs-uploading" style="display:none"></div>
+
+      <button class="btn btn-p" id="createBtn" style="width:100%;padding:11px;font-size:13.5px" onclick="doCreate()">
+        ${ipfsConfigured?'🪐 Upload to IPFS &amp; Create Campaign':'Create Campaign'}
+      </button>
+      <p class="fhint" style="margin-top:10px;text-align:center">
+        Metadata is pinned permanently to IPFS. The CID is emitted in the <code>CampaignCreated</code> event — readable off-chain at zero storage cost (gas-optimized contract).
+      </p>
+    </div>`;
+}
+
+/* ═══ RENDER ════════════════════════════════════════════════ */
+function render() {
+  const el=document.getElementById('view');
+  if (!account){el.innerHTML=vConnect();return;}
+  switch(currentView){
+    case 'dashboard':     el.innerHTML=vDashboard();    break;
+    case 'browse':        el.innerHTML=vBrowse();       break;
+    case 'mycampaigns':   el.innerHTML=vMyCampaigns();  break;
+    case 'contributions': el.innerHTML=vContributions();break;
+    case 'rewards':       el.innerHTML=vRewards();      break;
+    case 'create':        el.innerHTML=vCreate();       break;
+    default:              el.innerHTML=vBrowse();
+  }
+}
+
+/* ═══ BOOTSTRAP ══════════════════════════════════════════════ */
+renderWallet(); showAuthNav(false); render();
+(async()=>{
+  if (!window.ethereum) return;
+  try {
+    const accs=await window.ethereum.request({method:'eth_accounts'});
+    if (accs?.length>0) await initWallet(accs[0]);
+  } catch(e){ console.warn('Auto-connect skipped:',e); }
+})();
+</script>
+</body>
+</html>
