@@ -1,4 +1,4 @@
-# CrowdFunding DApp — Project 7: Decentralized Crowdfunding Platform
+# CrowdFunding DApp — Project 8 Decentralized Crowdfunding Platform
 
 A decentralized crowdfunding platform built with Solidity and Hardhat, featuring an original contract and a gas-optimized version, with full test coverage (29 tests) and a detailed gas analysis report.
 
@@ -191,7 +191,8 @@ npx hardhat coverage
 ```
 ## Gas Optimization
 
-<img width="1308" height="755" alt="WhatsApp Image 2026-05-10 at 10 08 46 PM" src="https://github.com/user-attachments/assets/0bb60f98-eb10-4bb1-8120-2390e0e677af" />
+<img width="1385" height="650" alt="Screenshot 2026-05-10 161511" src="https://github.com/user-attachments/assets/ecdbdab3-680e-4ae7-b6d4-eefcff1118e7" />
+
 
 
 ### Function Optimized: `createCampaign()`
