@@ -8,9 +8,12 @@ A decentralized crowdfunding platform built with Solidity and Hardhat, featuring
 
 | Name | Roll Number |
 |------|-------------|
-| [Full Name 1] | [Roll Number 1] |
-| [Full Name 2] | [Roll Number 2] |
-| [Full Name 3] | [Roll Number 3] |
+| [Managari Saatvik]  | [240002035] |
+| [Malladi Charan] | [240008016] |
+| [Nemani Sandeep] | [240002044] |
+| [Nagalla Abhisri Karthik] | [240002041] |
+| [Prayuktha Lucky Reddy] | [240041025] |
+| [Nitya Sigadapu] | [240005048] |
 
 > **Note:** Fill in your full names and roll numbers above. Missing names result in –1 mark each.
 
