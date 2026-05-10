@@ -189,40 +189,6 @@ This prints a gas usage table after the test results showing per-function costs 
 ```bash
 npx hardhat coverage
 ```
-
-Expected coverage output:
-
-```
---------------------------|----------|----------|----------|----------|
-File                      |  % Stmts | % Branch |  % Funcs |  % Lines |
---------------------------|----------|----------|----------|----------|
-  crowdfund_main.sol      |      100 |    95.83 |      100 |      100 |
-  crowdfund_optimized.sol |      100 |    95.83 |      100 |      100 |
---------------------------|----------|----------|----------|----------|
-All files                 |      100 |    95.83 |      100 |      100 |
-```
-
-An HTML report is generated at `coverage/index.html`. Open it from WSL with:
-```
-\\wsl$\Ubuntu\home\<username>\CrowdFunding_DApp\coverage\index.html
-```
-
-### Step 5 — Deploy (Optional)
-
-To deploy to a test network such as Sepolia:
-
-```bash
-npx hardhat run scripts/deploy.js --network sepolia
-```
-
-Ensure your `.env` file contains your private key and RPC URL before deploying:
-```
-PRIVATE_KEY=your_wallet_private_key
-SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your_project_id
-```
-
----
-
 ## Gas Optimization
 
 <img width="1308" height="755" alt="WhatsApp Image 2026-05-10 at 10 08 46 PM" src="https://github.com/user-attachments/assets/0bb60f98-eb10-4bb1-8120-2390e0e677af" />
