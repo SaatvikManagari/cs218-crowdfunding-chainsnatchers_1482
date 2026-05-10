@@ -17,7 +17,7 @@ A decentralized crowdfunding platform built with Solidity and Hardhat, featuring
 
 ## Implementation 
 
-#Link: [crowdfundingdefi.netfily.app](crowdfundingdefi.netlify.app)
+Website Link: [crowdfundingdefi.netfily.app](crowdfundingdefi.netlify.app)
 
 ---
 
