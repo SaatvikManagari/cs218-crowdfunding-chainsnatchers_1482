@@ -15,7 +15,6 @@ A decentralized crowdfunding platform built with Solidity and Hardhat, featuring
 | [Prayuktha Lucky Reddy] | [240041025] |
 | [Nitya Sigadapu] | [240005048] |
 
-> **Note:** Fill in your full names and roll numbers above. Missing names result in –1 mark each.
 
 ---
 
@@ -218,6 +217,9 @@ SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your_project_id
 ---
 
 ## Gas Optimization
+
+<img width="1308" height="755" alt="WhatsApp Image 2026-05-10 at 10 08 46 PM" src="https://github.com/user-attachments/assets/0bb60f98-eb10-4bb1-8120-2390e0e677af" />
+
 
 ### Function Optimized: `createCampaign()`
 
