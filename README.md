@@ -292,5 +292,5 @@ Anyone who clones this repo gets all of the above back by running `npm install` 
 - **OpenZeppelin import not found:** Run `npm install @openzeppelin/contracts@5.0.1` and recompile.
 - **Branch coverage 95.83%:** A small number of implicit Solidity branches (e.g., overflow checks) are not reachable in tests without breaking the EVM — this is expected and not a gap in test design.
 - **Frontend is local only:** The `frontend/index.html` DApp must be connected to a locally running Hardhat node or a testnet. It does not connect to mainnet.
-- **IPFS is Not Supported by our college network**  Alothough it is included in the code, it couldn't be throughly tested
+- **IPFS Doesnot Work on IITI College Network** Please any other network provider to access ipfs data
 - **User Verification is not included** as it removes the idea of pseudo anonymity
