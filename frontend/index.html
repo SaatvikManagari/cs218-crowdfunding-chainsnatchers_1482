@@ -292,7 +292,7 @@ body{
 /* ═══════════════════════════════════════════════════════════════════
    CONFIG — update these two values
 ═══════════════════════════════════════════════════════════════════ */
-const CONTRACT_ADDRESS = '0xe6AB9b6cF05BAD71285Faf1D43e9E1a439E833A6';  // ← UPDATE to your CrowdFundOptimized deployment address
+const CONTRACT_ADDRESS = '0x76B244301B34113B07DdC67bBFB87c233CD68500';  // ← UPDATE to your CrowdFundOptimized deployment address
 
 /*
   PINATA IPFS CONFIG
@@ -302,7 +302,7 @@ const CONTRACT_ADDRESS = '0xe6AB9b6cF05BAD71285Faf1D43e9E1a439E833A6';  // ← U
   3. Paste your JWT below (starts with "eyJ…")
   Leave as '' to disable IPFS (campaigns will still work without metadata)
 */
-const PINATA_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJmMmJlMzMxNi1mYTQwLTRjNzktOGU4Yi1hZTQyNTM4MGNiZDciLCJlbWFpbCI6ImVlMjQwMDAyMDQxQGlpdGkuYWMuaW4iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiMjM4NmQ1YjY4MjRlNGMwYWUyZmYiLCJzY29wZWRLZXlTZWNyZXQiOiI0ZmMyYTI5ZmZlNzA0ZjkyMTUzOTA3NGE5YjI3ZDkzNjQwMmNhMWRmM2NlYmQxMjdmNDg5MWE3ZDMyODJiMGU2IiwiZXhwIjoxODA4NjQ0NjM5fQ.wF5_7qbrt_knPVjn3CW-ViooozgNDkrqxf6bp_y7j2M';   
+const PINATA_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJhNjgyYWFlOC0yYWUzLTQ2OGYtOWRhOC02NWQ1ZGM3MzliMWEiLCJlbWFpbCI6ImVlMjQwMDAyMDM1QGlpdGkuYWMuaW4iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJGUkExIn0seyJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MSwiaWQiOiJOWUMxIn1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiOGI3ODc2MjI2ZmU5Mzk5N2Q5YjQiLCJzY29wZWRLZXlTZWNyZXQiOiJlNjMwMDhhOWQ3ZTkyNDM4MjYzNzNhYTg0MzkwZGFkOGYzOGQ3NDEyNWZiMDRlZTNkY2IyM2FkNmY0OTQ4YzVlIiwiZXhwIjoxODEwMTAyNTU1fQ.sJ-bhu8CrGELtmVrUs9JFp22X09Lu1NK1ezIWSEJsVg';   
 const IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';  // or cloudflare-ipfs.com/ipfs/
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -311,43 +311,401 @@ const IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';  // or cloudflare-ipf
    · metadataCID lives ONLY in the CampaignCreated event log
    · createCampaign still accepts metadataCID as calldata (not stored)
 ═══════════════════════════════════════════════════════════════════ */
-const ABI = [
-  /* contribute */
-  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],"name":"contribute","outputs":[],"stateMutability":"payable","type":"function"},
-  /* createCampaign — goalWei, deadlineTimestamp, metadataCID (calldata only, emitted in event) */
-  {"inputs":[
-    {"internalType":"uint256","name":"_goalWei","type":"uint256"},
-    {"internalType":"uint256","name":"_deadlineTimestamp","type":"uint256"},
-    {"internalType":"string","name":"_metadataCID","type":"string"}
-  ],"name":"createCampaign","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
-  /* withdraw */
-  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},
-  /* refund */
-  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],"name":"refund","outputs":[],"stateMutability":"nonpayable","type":"function"},
-  /* getCampaign — OPTIMIZED: returns 5 values only (goal, raised, deadline, creator, state) */
-  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"}],
-   "name":"getCampaign",
-   "outputs":[
-     {"internalType":"uint256","name":"goal","type":"uint256"},
-     {"internalType":"uint256","name":"raised","type":"uint256"},
-     {"internalType":"uint256","name":"deadline","type":"uint256"},
-     {"internalType":"address","name":"creator","type":"address"},
-     {"internalType":"uint8","name":"state","type":"uint8"}
-   ],"stateMutability":"view","type":"function"},
-  /* getContribution */
-  {"inputs":[{"internalType":"uint256","name":"_campaignId","type":"uint256"},{"internalType":"address","name":"contributor","type":"address"}],"name":"getContribution","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  /* getAllCampaignIds */
-  {"inputs":[],"name":"getAllCampaignIds","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},
-  /* campaignCount */
-  {"inputs":[],"name":"campaignCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
-  /* events */
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"campaign_id","type":"uint256"},{"indexed":false,"internalType":"address","name":"owner","type":"address"},{"indexed":false,"internalType":"uint256","name":"goalWei","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"deadlineTimestamp","type":"uint256"},{"indexed":false,"internalType":"string","name":"metadataCID","type":"string"}],"name":"CampaignCreated","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"cmpgn","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Contributed","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address payable","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"campaign_id","type":"uint256"}],"name":"FundsWithdrawn","type":"event"},
-  {"anonymous":false,"inputs":[{"indexed":false,"internalType":"address payable","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"campaign_id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Refunded","type":"event"},
-  /* fallback + receive */
-  {"stateMutability":"payable","type":"fallback"},
-  {"stateMutability":"payable","type":"receive"}
+const ABI =  [
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "campaign_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "goalWei",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "deadlineTimestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataCID",
+        "type": "string"
+      }
+    ],
+    "name": "CampaignCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "cmpgn",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Contributed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address payable",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "campaign_id",
+        "type": "uint256"
+      }
+    ],
+    "name": "FundsWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address payable",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "campaign_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Refunded",
+    "type": "event"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "fallback"
+  },
+  {
+    "inputs": [],
+    "name": "campaignCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "campaign_map",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "enum CrowdFundOptimized.status",
+        "name": "state",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "goalWei",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadlineTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountcontributed",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_campaignId",
+        "type": "uint256"
+      }
+    ],
+    "name": "contribute",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_goalWei",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_deadlineTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_metadataCID",
+        "type": "string"
+      }
+    ],
+    "name": "createCampaign",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllCampaignIds",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_campaignId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getCampaign",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "goal",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "raised",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "internalType": "enum CrowdFundOptimized.status",
+        "name": "state",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_campaignId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "contributor",
+        "type": "address"
+      }
+    ],
+    "name": "getContribution",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_campaignId",
+        "type": "uint256"
+      }
+    ],
+    "name": "refund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_campaignId",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
+  }
 ];
 
 /* ═══ STATUS ENUM ══════════════════════════════════════════════ */
