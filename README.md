@@ -1,4 +1,4 @@
-# CrowdFunding DApp — Project 8 : Decentralized Crowdfunding Platform
+# CrowdFunding DApp — Project 8 Decentralized Crowdfunding Platform
 
 A decentralized crowdfunding platform built with Solidity and Hardhat, featuring an original contract and a gas-optimized version, with full test coverage (29 tests) and a detailed gas analysis report.
 
